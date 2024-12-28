@@ -1,7 +1,12 @@
 package ru.practicum.shareit.user.model;
 
-/**
- * TODO Sprint add-controllers.
- */
+@lombok.Data
+@lombok.AllArgsConstructor
+@lombok.EqualsAndHashCode(of = { "id" })
 public class User {
+    private Long id;
+
+    private String name;
+
+    private String email;
 }
