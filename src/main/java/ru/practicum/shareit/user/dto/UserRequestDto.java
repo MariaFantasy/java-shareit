@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Email;
 @lombok.Data
 @lombok.AllArgsConstructor
 @lombok.EqualsAndHashCode(of = { "email" })
-public class UserDto {
+public class UserRequestDto {
     private String name;
 
     @Email(message = "Email пользователя передан в некорректном формате")
