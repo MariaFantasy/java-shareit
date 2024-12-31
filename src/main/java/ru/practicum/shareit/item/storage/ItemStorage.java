@@ -1,14 +1,13 @@
 package ru.practicum.shareit.item.storage;
 
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 
 public interface ItemStorage {
     public Collection<Item> findByText(String text);
 
-    public Collection<Item> findByUser(User user);
+    public Collection<Item> findByUser(Long userId);
 
     public Item findById(Long itemId);
 

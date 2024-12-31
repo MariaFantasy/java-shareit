@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.storage;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,9 +21,9 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public Collection<Item> findByUser(User user) {
+    public Collection<Item> findByUser(Long userId) {
         return items.values().stream()
-                .filter(i -> i.getOwner().equals(user))
+                .filter(i -> i.getOwner().getId().equals(userId))
                 .collect(Collectors.toCollection(HashSet<Item>::new));
     }
 

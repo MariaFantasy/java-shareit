@@ -3,15 +3,17 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 @Service("itemServiceImpl")
 @RequiredArgsConstructor
@@ -21,52 +23,56 @@ public class ItemServiceImpl implements ItemService {
     private final ItemDtoMapper itemDtoMapper;
 
     @Override
-    public Collection<Item> findByText(String text) {
+    public Collection<ItemResponseDto> findByText(String text) {
         if (text == null || text.isEmpty()) {
-            return new HashSet<Item>();
+            return new HashSet<ItemResponseDto>();
         }
-        return itemStorage.findByText(text);
+        return itemStorage.findByText(text).stream()
+                .map(itemDtoMapper::mapToResponseDto)
+                .collect(Collectors.toCollection(HashSet::new));
     }
 
     @Override
-    public Collection<Item> findByUserId(Long userId) {
-        final User user = userService.findById(userId);
-        return itemStorage.findByUser(user);
+    public Collection<ItemResponseDto> findByUserId(Long userId) {
+        final UserResponseDto user = userService.findById(userId);
+        return itemStorage.findByUser(user.getId()).stream()
+                .map(itemDtoMapper::mapToResponseDto)
+                .collect(Collectors.toCollection(HashSet::new));
     }
 
     @Override
-    public Item findById(Long itemId) {
+    public ItemResponseDto findById(Long itemId) {
         final Item item = itemStorage.findById(itemId);
-        return item;
+        return itemDtoMapper.mapToResponseDto(item);
     }
 
     @Override
-    public Item create(Long userId, ItemDto itemDto) {
-        final User user = userService.findById(userId);
-        if (itemDto.getName() == null || itemDto.getName().isEmpty() || itemDto.getDescription() == null || itemDto.getAvailable() == null) {
+    public ItemResponseDto create(Long userId, ItemRequestDto itemRequestDto) {
+        final UserResponseDto user = userService.findById(userId);
+        if (itemRequestDto.getName() == null || itemRequestDto.getName().isEmpty() || itemRequestDto.getDescription() == null || itemRequestDto.getAvailable() == null) {
             throw new ValidationException("Описание вещи заполнено неполностью для создания.");
         }
-        final Item item = itemStorage.create(itemDtoMapper.mapFromDto(user, itemDto));
-        return item;
+        final Item item = itemStorage.create(itemDtoMapper.mapFromDto(user, itemRequestDto));
+        return itemDtoMapper.mapToResponseDto(item);
     }
 
     @Override
-    public Item update(Long itemId, Long userId, ItemDto itemDto) {
+    public ItemResponseDto update(Long itemId, Long userId, ItemRequestDto itemRequestDto) {
         final Item item = itemStorage.findById(itemId);
-        final User user = userService.findById(userId);
+        final UserResponseDto user = userService.findById(userId);
         if (!item.getOwner().equals(user)) {
             throw new ValidationException("Обновить вещь пытается не владелец.");
         }
-        if (itemDto.getName() != null) {
-            item.setName(itemDto.getName());
+        if (itemRequestDto.getName() != null) {
+            item.setName(itemRequestDto.getName());
         }
-        if (itemDto.getDescription() != null) {
-            item.setDescription(itemDto.getDescription());
+        if (itemRequestDto.getDescription() != null) {
+            item.setDescription(itemRequestDto.getDescription());
         }
-        if (itemDto.getAvailable() != null) {
-            item.setAvailable(itemDto.getAvailable());
+        if (itemRequestDto.getAvailable() != null) {
+            item.setAvailable(itemRequestDto.getAvailable());
         }
         final Item updatedItem = itemStorage.update(item);
-        return updatedItem;
+        return itemDtoMapper.mapToResponseDto(updatedItem);
     }
 }
