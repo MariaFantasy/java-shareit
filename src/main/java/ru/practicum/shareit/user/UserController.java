@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserRequestDto;
+import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -19,41 +20,41 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public Collection<User> findAll() {
+    public Collection<UserResponseDto> findAll() {
         log.info("Пришел GET запрос /users");
-        final Collection<User> users = userService.findAll();
+        final Collection<UserResponseDto> users = userService.findAll();
         log.info("Отправлен ответ GET /users с телом: {}", users);
         return users;
     }
 
     @GetMapping("/{userId}")
-    public User findById(@PathVariable Long userId) {
+    public UserResponseDto findById(@PathVariable Long userId) {
         log.info("Пришел GET зарпос /users/{}", userId);
-        final User user = userService.findById(userId);
+        final UserResponseDto user = userService.findById(userId);
         log.info("Отправлен ответ GET /users/{} с телом: {}", userId, user);
         return user;
     }
 
     @PostMapping
-    public User create(@Valid @RequestBody UserDto userDto) {
-        log.info("Пришел POST запрос /users с телом: {}", userDto);
-        final User createdUser = userService.create(userDto);
+    public UserResponseDto create(@Valid @RequestBody UserRequestDto userRequestDto) {
+        log.info("Пришел POST запрос /users с телом: {}", userRequestDto);
+        final UserResponseDto createdUser = userService.create(userRequestDto);
         log.info("Отправлен ответ POST /users с телом: {}", createdUser);
         return createdUser;
     }
 
     @PatchMapping("/{userId}")
-    public User update(@PathVariable Long userId, @Valid @RequestBody UserDto userDto) {
-        log.info("Пришел PATCH запрос /users/{} с телом: {}", userId, userDto);
-        final User updatedUser = userService.update(userId, userDto);
+    public UserResponseDto update(@PathVariable Long userId, @Valid @RequestBody UserRequestDto userRequestDto) {
+        log.info("Пришел PATCH запрос /users/{} с телом: {}", userId, userRequestDto);
+        final UserResponseDto updatedUser = userService.update(userId, userRequestDto);
         log.info("Отправлен ответ PATCH /users/{} с телом: {}", userId, updatedUser);
         return updatedUser;
     }
 
     @DeleteMapping("/{userId}")
-    public User delete(@PathVariable Long userId) {
+    public UserResponseDto delete(@PathVariable Long userId) {
         log.info("Пришел DELETE зарпос /users/{}", userId);
-        final User user = userService.delete(userId);
+        final UserResponseDto user = userService.delete(userId);
         log.info("Отправлен ответ DELETE /users/{} с телом: {}", userId, user);
         return user;
     }
