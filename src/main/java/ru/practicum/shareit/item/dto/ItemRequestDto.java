@@ -2,7 +2,7 @@ package ru.practicum.shareit.item.dto;
 
 @lombok.Data
 @lombok.AllArgsConstructor
-public class ItemDto {
+public class ItemRequestDto {
     private String name;
 
     private String description;

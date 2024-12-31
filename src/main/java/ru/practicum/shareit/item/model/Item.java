@@ -1,6 +1,6 @@
 package ru.practicum.shareit.item.model;
 
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.dto.UserResponseDto;
 
 @lombok.Data
 @lombok.AllArgsConstructor
@@ -8,7 +8,7 @@ import ru.practicum.shareit.user.model.User;
 public class Item {
     private Long id;
 
-    private User owner;
+    private UserResponseDto owner;
 
     private String name;
 

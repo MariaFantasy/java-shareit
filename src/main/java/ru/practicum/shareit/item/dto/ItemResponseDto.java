@@ -1,10 +1,8 @@
 package ru.practicum.shareit.item.dto;
 
-import ru.practicum.shareit.user.model.User;
-
 @lombok.Data
 @lombok.AllArgsConstructor
-public class ItemCreateResponseDto {
+public class ItemResponseDto {
     private Long id;
 
     private String name;
