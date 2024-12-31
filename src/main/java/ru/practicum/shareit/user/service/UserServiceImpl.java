@@ -2,15 +2,16 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.AlreadyExistException;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserRequestDto;
+import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 
 @Service("userServiceImpl")
 @RequiredArgsConstructor
@@ -19,56 +20,47 @@ public class UserServiceImpl implements UserService {
     private final UserDtoMapper userDtoMapper;
 
     @Override
-    public Collection<User> findAll() {
-        return userStorage.findAll();
+    public Collection<UserResponseDto> findAll() {
+        return userStorage.findAll().stream()
+                .map(userDtoMapper::mapToResponseDto)
+                .collect(Collectors.toCollection(HashSet::new));
     }
 
     @Override
-    public User findById(Long userId) {
+    public UserResponseDto findById(Long userId) {
         final User user = userStorage.findById(userId);
-        return user;
+        return userDtoMapper.mapToResponseDto(user);
     }
 
     @Override
-    public User create(UserDto userDto) {
-        if (userDto.getEmail() == null) {
+    public UserResponseDto create(UserRequestDto userRequestDto) {
+        if (userRequestDto.getEmail() == null) {
             throw new ValidationException("Email нового пользователя пустой.");
         }
-        try {
-            final User oldUser = userStorage.findByEmail(userDto.getEmail());
-            throw new AlreadyExistException("Пользователь с email = " + userDto.getEmail() + " уже существует.");
-        } catch (NotFoundException e) {
-            final User user = userStorage.create(userDtoMapper.mapFromDto(userDto));
-            return user;
-        }
+        final User user = userStorage.create(userDtoMapper.mapFromDto(userRequestDto));
+        return userDtoMapper.mapToResponseDto(user);
     }
 
     @Override
-    public User update(Long userId, UserDto userDto) {
-        final User user = userStorage.findById(userId);
-        if (userDto.getName() != null) {
-            user.setName(userDto.getName());
+    public UserResponseDto update(Long userId, UserRequestDto userRequestDto) {
+        final User user = userDtoMapper.mapFromDto(userRequestDto);
+        final User oldUser = userStorage.findById(userId);
+        user.setId(oldUser.getId());
+        if (userRequestDto.getName() == null) {
+            user.setName(oldUser.getName());
         }
-        if (userDto.getEmail() != null) {
-            try {
-                final User oldUser = userStorage.findByEmail(userDto.getEmail());
-                if (oldUser.getId().equals(userId)) {
-                    throw new NotFoundException("Тот же самый пользователь.");
-                }
-                throw new AlreadyExistException("Пользователь с email = " + userDto.getEmail() + " уже существует.");
-            } catch (NotFoundException e) {
-                user.setEmail(userDto.getEmail());
-            }
+        if (userRequestDto.getEmail() == null) {
+            user.setEmail(oldUser.getEmail());
         }
 
         final User updatedUser = userStorage.update(user);
-        return updatedUser;
+        return userDtoMapper.mapToResponseDto(updatedUser);
     }
 
     @Override
-    public User delete(Long userId) {
+    public UserResponseDto delete(Long userId) {
         final User user = userStorage.findById(userId);
         userStorage.delete(user.getId());
-        return user;
+        return userDtoMapper.mapToResponseDto(user);
     }
 }

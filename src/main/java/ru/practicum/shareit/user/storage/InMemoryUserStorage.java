@@ -1,18 +1,16 @@
 package ru.practicum.shareit.user.storage;
 
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.exception.AlreadyExistException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component("inMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
+    private final Set<String> emailUniqSet = new HashSet<>();
     private long userCounter = 0;
 
     @Override
@@ -30,30 +28,30 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User findByEmail(String email) {
-        if (email == null) {
-            throw new ValidationException("Запрашивается пустой email.");
-        }
-        final Optional<User> user = users.values().stream()
-                .filter(u -> email.equals(u.getEmail()))
-                .findFirst();
-        if (user.isEmpty()) {
-            throw new NotFoundException("Пользователь с email = " + email + " не найден.");
-        }
-        return user.get();
-    }
-
-    @Override
     public User create(User user) {
+        final String email = user.getEmail();
+        if (emailUniqSet.contains(email)) {
+            throw new AlreadyExistException("Пользователь с email = " + email + " уже существует.");
+        }
         final long userId = getNextId();
         user.setId(userId);
         users.put(userId, user);
+        emailUniqSet.add(user.getEmail());
         return user;
     }
 
     @Override
     public User update(User user) {
+        final String email = user.getEmail();
         final Long userId = user.getId();
+        final User oldUser = users.get(userId);
+        if (!email.equals(oldUser.getEmail())) {
+            if (emailUniqSet.contains(email)) {
+                throw new AlreadyExistException("Пользователь с email = " + email + " уже существует.");
+            }
+            emailUniqSet.remove(oldUser.getEmail());
+            emailUniqSet.add(email);
+        }
         users.put(userId, user);
         return user;
     }

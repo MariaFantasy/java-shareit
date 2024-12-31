@@ -9,8 +9,6 @@ public interface UserStorage {
 
     public User findById(Long userId);
 
-    public User findByEmail(String email);
-
     public User create(User user);
 
     public User update(User user);
