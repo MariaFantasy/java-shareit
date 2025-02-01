@@ -118,12 +118,6 @@ public class BookingServiceImpl implements BookingService {
         if (!itemDto.getAvailable()) {
             throw new ValidationException("Запрос на бронирование недоступной для бронирования вещи.");
         }
-        if (bookingRequestDto.getStart().isBefore(LocalDateTime.now()) || bookingRequestDto.getEnd().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Запрос на бронирование в прошедшие даты.");
-        }
-        if (bookingRequestDto.getStart().isAfter(bookingRequestDto.getEnd()) || bookingRequestDto.getStart().equals(bookingRequestDto.getEnd())) {
-            throw new ValidationException("Дата начала бронирования из запроса позже и равна дате конца бронирования.");
-        }
 
         final User user = userDtoMapper.mapFromDto(userDto);
         final Item item = itemDtoMapper.mapFromDto(user, itemDto);
