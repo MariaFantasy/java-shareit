@@ -182,10 +182,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Modifying(clearAutomatically = true)
     @Query(value = """
-            UPDATE bookings b
+            UPDATE bookings
             SET
-                b.status = CASE WHEN ?2 = 'True' THEN 'APPROVED' ELSE 'REJECTED' END
-            WHERE b.booking_id = ?1
+                status = CASE WHEN ?2 = 'True' THEN 'APPROVED' ELSE 'REJECTED' END
+            WHERE booking_id = ?1
         """,
         nativeQuery = true
     )
