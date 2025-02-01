@@ -136,18 +136,22 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponseDto approve(Long userId, Long bookingId, Boolean approved) {
-        final Booking booking = bookingRepository.findById(bookingId).orElseThrow(
-                () -> new NotFoundException("Бронирование с id = " + bookingId + " не найдено.")
-        );
-        if (!userId.equals(booking.getItem().getOwner().getId())) {
-            throw new AccessException("Бронирование пытается одобрить не хозяин вещи.");
+        try {
+            final Booking booking = bookingRepository.findById(bookingId).orElseThrow(
+                    () -> new NotFoundException("Бронирование с id = " + bookingId + " не найдено.")
+            );
+            if (!userId.equals(booking.getItem().getOwner().getId())) {
+                throw new AccessException("Бронирование пытается одобрить не хозяин вещи.");
+            }
+            final UserResponseDto userDto = userDtoMapper.mapToResponseDto(booking.getUser());
+            final ItemResponseDto itemDto = itemDtoMapper.mapToResponseDto(booking.getItem());
+            bookingRepository.approve(bookingId, approved);
+            final Booking updatedBooking = bookingRepository.findById(bookingId).orElseThrow(
+                    () -> new NotFoundException("Бронирование с id = " + bookingId + " не найдено.")
+            );
+            return bookingDtoMapper.mapToResponseDto(userDto, itemDto, updatedBooking);
+        } catch (Exception e) {
+            throw new ValidationException(e.getMessage());
         }
-        final UserResponseDto userDto = userDtoMapper.mapToResponseDto(booking.getUser());
-        final ItemResponseDto itemDto = itemDtoMapper.mapToResponseDto(booking.getItem());
-        bookingRepository.approve(bookingId, approved);
-        final Booking updatedBooking = bookingRepository.findById(bookingId).orElseThrow(
-                () -> new NotFoundException("Бронирование с id = " + bookingId + " не найдено.")
-        );
-        return bookingDtoMapper.mapToResponseDto(userDto, itemDto, updatedBooking);
     }
 }
