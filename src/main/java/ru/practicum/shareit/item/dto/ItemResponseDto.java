@@ -1,5 +1,8 @@
 package ru.practicum.shareit.item.dto;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
+
 @lombok.Data
 @lombok.AllArgsConstructor
 public class ItemResponseDto {
@@ -9,5 +12,11 @@ public class ItemResponseDto {
 
     private String description;
 
-    private boolean available;
+    private Boolean available;
+
+    private Collection<CommentResponseDto> comments;
+
+    private LocalDateTime lastBooking;
+
+    private LocalDateTime nextBooking;
 }

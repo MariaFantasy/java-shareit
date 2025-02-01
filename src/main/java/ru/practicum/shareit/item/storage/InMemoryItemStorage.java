@@ -31,7 +31,7 @@ public class InMemoryItemStorage implements ItemStorage {
     public Item findById(Long itemId) {
         final Item item = items.get(itemId);
         if (item == null) {
-            throw new NotFoundException("Вещь с id = " + itemId + " не найден.");
+            throw new NotFoundException("Вещь с id = " + itemId + " не найдена.");
         }
         return item;
     }
