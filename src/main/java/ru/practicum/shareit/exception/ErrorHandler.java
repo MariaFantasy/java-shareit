@@ -42,4 +42,13 @@ public class ErrorHandler {
                 e.getMessage()
         );
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleAccessException(final Exception e) {
+        return new ErrorResponse(
+                "Неотслеживаемая ошибка.",
+                e.getMessage()
+        );
+    }
 }

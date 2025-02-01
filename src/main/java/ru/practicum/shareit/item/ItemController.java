@@ -64,13 +64,9 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public CommentResponseDto addComment(@PathVariable Long itemId, @RequestHeader(USER_ID_HEADER_NAME) Long userId, @Valid @RequestBody CommentRequestDto commentRequestDto) {
-        try {
-            log.info("Пришел POST запрос /items/{}/comment с userId = {} и телом: {}", itemId, userId, commentRequestDto);
-            final CommentResponseDto createdComment = itemService.addComment(userId, itemId, commentRequestDto);
-            log.info("Отпавлен ответ POST /items/{}/comment с телом: {}", itemId, createdComment);
-            return createdComment;
-        } catch (Exception e) {
-            throw new ValidationException(e.getMessage());
-        }
+        log.info("Пришел POST запрос /items/{}/comment с userId = {} и телом: {}", itemId, userId, commentRequestDto);
+        final CommentResponseDto createdComment = itemService.addComment(userId, itemId, commentRequestDto);
+        log.info("Отпавлен ответ POST /items/{}/comment с телом: {}", itemId, createdComment);
+        return createdComment;
     }
 }
