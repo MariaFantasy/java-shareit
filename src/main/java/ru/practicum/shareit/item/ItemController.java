@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item;
 
 import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
