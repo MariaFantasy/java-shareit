@@ -14,7 +14,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 b.*
             FROM bookings AS b
             INNER JOIN items AS i
-                ON b.item_id = i.item_id
+                ON b.item_id = i.id
                 AND b.user_id = ?1
             ORDER BY b.start_date DESC
         """,
@@ -27,7 +27,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 b.*
             FROM bookings AS b
             INNER JOIN items AS i
-                ON b.item_id = i.item_id
+                ON b.item_id = i.id
                 AND b.user_id = ?1
                 AND b.start_date <= now()
                 AND b.end_date > now()
@@ -42,7 +42,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 b.*
             FROM bookings AS b
             INNER JOIN items AS i
-                ON b.item_id = i.item_id
+                ON b.item_id = i.id
                 AND b.user_id = ?1
                 AND b.end_date <= now()
             ORDER BY b.start_date DESC
@@ -56,7 +56,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 b.*
             FROM bookings AS b
             INNER JOIN items AS i
-                ON b.item_id = i.item_id
+                ON b.item_id = i.id
                 AND b.user_id = ?1
                 AND b.start_date > now()
             ORDER BY b.start_date DESC
@@ -70,7 +70,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 b.*
             FROM bookings AS b
             INNER JOIN items AS i
-                ON b.item_id = i.item_id
+                ON b.item_id = i.id
                 AND b.user_id = ?1
                 AND b.status = "WAITING"
             ORDER BY b.start_date DESC
@@ -84,7 +84,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 b.*
             FROM bookings AS b
             INNER JOIN items AS i
-                ON b.item_id = i.item_id
+                ON b.item_id = i.id
                 AND b.user_id = ?1
                 AND b.status = "REJECTED"
             ORDER BY b.start_date DESC
@@ -100,7 +100,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 b.*
             FROM bookings AS b
             INNER JOIN items AS i
-                ON b.item_id = i.item_id
+                ON b.item_id = i.id
                 AND i.owner_id = ?1
             ORDER BY b.start_date DESC
         """,
@@ -113,7 +113,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 b.*
             FROM bookings AS b
             INNER JOIN items AS i
-                ON b.item_id = i.item_id
+                ON b.item_id = i.id
                 AND i.owner_id = ?1
                 AND b.start_date <= now()
                 AND b.end_date > now()
@@ -128,7 +128,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 b.*
             FROM bookings AS b
             INNER JOIN items AS i
-                ON b.item_id = i.item_id
+                ON b.item_id = i.id
                 AND i.owner_id = ?1
                 AND b.end_date <= now()
             ORDER BY b.start_date DESC
@@ -142,7 +142,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 b.*
             FROM bookings AS b
             INNER JOIN items AS i
-                ON b.item_id = i.item_id
+                ON b.item_id = i.id
                 AND i.owner_id = ?1
                 AND b.start_date > now()
             ORDER BY b.start_date DESC
@@ -156,7 +156,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 b.*
             FROM bookings AS b
             INNER JOIN items AS i
-                ON b.item_id = i.item_id
+                ON b.item_id = i.id
                 AND i.owner_id = ?1
                 AND b.status = "WAITING"
             ORDER BY b.start_date DESC
@@ -170,7 +170,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 b.*
             FROM bookings AS b
             INNER JOIN items AS i
-                ON b.item_id = i.item_id
+                ON b.item_id = i.id
                 AND i.owner_id = ?1
                 AND b.status = "REJECTED"
             ORDER BY b.start_date DESC
@@ -185,7 +185,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             UPDATE bookings
             SET
                 status = CASE WHEN ?2 = 'True' THEN 'APPROVED' ELSE 'REJECTED' END
-            WHERE booking_id = ?1
+            WHERE id = ?1
         """,
         nativeQuery = true
     )

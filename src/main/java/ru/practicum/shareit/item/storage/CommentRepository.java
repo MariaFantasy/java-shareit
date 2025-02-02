@@ -10,7 +10,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query(value = """
             SELECT c.*
             FROM comments AS c
-            WHERE c.item_id = ?1
+            WHERE c.id = ?1
         """,
         nativeQuery = true
     )

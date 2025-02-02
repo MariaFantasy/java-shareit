@@ -12,7 +12,7 @@ import ru.practicum.shareit.user.model.User;
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "item_id")
+    @Column(name = "id")
     private Long id;
 
     @ManyToOne
