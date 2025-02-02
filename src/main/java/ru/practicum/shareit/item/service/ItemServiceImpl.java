@@ -138,7 +138,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public CommentResponseDto addComment(Long userId, Long itemId, CommentRequestDto commentRequestDto) {
+    public ItemResponseDto addComment(Long userId, Long itemId, CommentRequestDto commentRequestDto) {
         final User user = userDtoMapper.mapFromDto(userService.findById(userId));
         final Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException("Вещь с id = " + itemId + " не найдена.")
@@ -151,9 +151,17 @@ public class ItemServiceImpl implements ItemService {
                         () -> new ValidationException("Вещь с id = " + itemId + " не найдена среди прошлых бронирований пользователя " + userId + ".")
                 );
         final Comment comment = commentRepository.save(commentDtoMapper.mapFromDto(item, user, commentRequestDto, LocalDateTime.now()));
-        return commentDtoMapper.mapToResponseDto(comment);
+
+        final Item createdItem = itemRepository.findById(itemId).orElseThrow(
+                () -> new NotFoundException("Вещь с id = " + itemId + " не найдена.")
+        );
+        ItemResponseDto itemResponseDto = itemDtoMapper.mapToResponseDto(createdItem);
+        loadComments(itemResponseDto);
+        return itemResponseDto;
+//        return commentDtoMapper.mapToResponseDto(comment);
     }
 
+    @Transactional
     private void loadComments(ItemResponseDto item) {
         Collection<CommentResponseDto> comments = commentRepository.findByItemId(item.getId()).stream()
                         .map(commentDtoMapper::mapToResponseDto)
