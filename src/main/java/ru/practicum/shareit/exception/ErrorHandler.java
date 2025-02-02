@@ -33,4 +33,13 @@ public class ErrorHandler {
                 e.getMessage()
         );
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleAccessException(final AccessException e) {
+        return new ErrorResponse(
+                "К объекту пытается получить доступ клиент, который не имеет доступ к нему.",
+                e.getMessage()
+        );
+    }
 }

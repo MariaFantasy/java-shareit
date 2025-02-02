@@ -16,6 +16,15 @@ public class UserDtoMapper {
         return user;
     }
 
+    public User mapFromDto(UserResponseDto userResponseDto) {
+        final User user = new User(
+                userResponseDto.getId(),
+                userResponseDto.getName(),
+                userResponseDto.getEmail()
+        );
+        return user;
+    }
+
     public UserResponseDto mapToResponseDto(User user) {
         final UserResponseDto userDto = new UserResponseDto(
                 user.getId(),

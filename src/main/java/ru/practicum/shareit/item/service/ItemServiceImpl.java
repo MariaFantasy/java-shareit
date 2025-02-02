@@ -1,16 +1,32 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.dto.BookingStateDto;
+import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.dto.CommentRequestDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
+import ru.practicum.shareit.item.mapper.CommentDtoMapper;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.item.storage.CommentRepository;
+import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.dto.UserResponseDto;
+import ru.practicum.shareit.user.mapper.UserDtoMapper;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.stream.Collectors;
@@ -19,48 +35,87 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final UserService userService;
-    private final ItemStorage itemStorage;
+    private final ItemRepository itemRepository;
+    private final CommentRepository commentRepository;
+    private final UserDtoMapper userDtoMapper;
     private final ItemDtoMapper itemDtoMapper;
+    private final CommentDtoMapper commentDtoMapper;
+
+    @Lazy
+    @Autowired
+    private BookingService bookingService;
 
     @Override
     public Collection<ItemResponseDto> findByText(String text) {
         if (text == null || text.isEmpty()) {
             return new HashSet<ItemResponseDto>();
         }
-        return itemStorage.findByText(text).stream()
+        return itemRepository.findByText(text).stream()
                 .map(itemDtoMapper::mapToResponseDto)
+                .peek(this::loadComments)
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
     @Override
     public Collection<ItemResponseDto> findByUserId(Long userId) {
         final UserResponseDto user = userService.findById(userId);
-        return itemStorage.findByUser(user.getId()).stream()
-                .map(itemDtoMapper::mapToResponseDto)
+        return itemRepository.findByOwnerId(user.getId()).stream()
+                .map(item -> itemDtoMapper.mapToResponseDto(item,
+                        getLastBooking(item.getOwner().getId(), item.getId()),
+                        getNextBooking(item.getOwner().getId(), item.getId()))
+                )
+                .peek(this::loadComments)
                 .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    private LocalDateTime getLastBooking(Long ownerId, Long itemId) {
+        LocalDateTime lastBooking = bookingService.findByOwnerId(ownerId, BookingStateDto.ALL).stream()
+                .filter(booking -> booking.getItem().getId().equals(itemId))
+                .map(BookingResponseDto::getStart)
+                .filter(datetime -> !datetime.isAfter(LocalDateTime.now()))
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
+        return lastBooking;
+    }
+
+    private LocalDateTime getNextBooking(Long ownerId, Long itemId) {
+        LocalDateTime lastBooking = bookingService.findByOwnerId(ownerId, BookingStateDto.ALL).stream()
+                .filter(booking -> booking.getItem().getId().equals(itemId))
+                .map(BookingResponseDto::getStart)
+                .filter(datetime -> datetime.isAfter(LocalDateTime.now()))
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
+        return lastBooking;
     }
 
     @Override
     public ItemResponseDto findById(Long itemId) {
-        final Item item = itemStorage.findById(itemId);
-        return itemDtoMapper.mapToResponseDto(item);
+        final Item item = itemRepository.findById(itemId).orElseThrow(
+                () -> new NotFoundException("Вещь с id = " + itemId + " не найдена.")
+        );
+
+        ItemResponseDto itemResponseDto = itemDtoMapper.mapToResponseDto(item);
+        loadComments(itemResponseDto);
+        return itemResponseDto;
     }
 
     @Override
     public ItemResponseDto create(Long userId, ItemRequestDto itemRequestDto) {
-        final UserResponseDto user = userService.findById(userId);
+        final User user = userDtoMapper.mapFromDto(userService.findById(userId));
         if (itemRequestDto.getName() == null || itemRequestDto.getName().isEmpty() || itemRequestDto.getDescription() == null || itemRequestDto.getAvailable() == null) {
             throw new ValidationException("Описание вещи заполнено неполностью для создания.");
         }
-        final Item item = itemStorage.create(itemDtoMapper.mapFromDto(user, itemRequestDto));
+        final Item item = itemRepository.save(itemDtoMapper.mapFromDto(user, itemRequestDto));
         return itemDtoMapper.mapToResponseDto(item);
     }
 
     @Override
     public ItemResponseDto update(Long itemId, Long userId, ItemRequestDto itemRequestDto) {
-        final Item item = itemStorage.findById(itemId);
+        final Item item = itemRepository.findById(itemId).orElseThrow(
+                () -> new NotFoundException("Вещь с id = " + itemId + " не найдена.")
+        );
         final UserResponseDto user = userService.findById(userId);
-        if (!item.getOwner().equals(user)) {
+        if (!item.getOwner().equals(userDtoMapper.mapFromDto(user))) {
             throw new ValidationException("Обновить вещь пытается не владелец.");
         }
         if (itemRequestDto.getName() != null) {
@@ -72,7 +127,32 @@ public class ItemServiceImpl implements ItemService {
         if (itemRequestDto.getAvailable() != null) {
             item.setAvailable(itemRequestDto.getAvailable());
         }
-        final Item updatedItem = itemStorage.update(item);
+        final Item updatedItem = itemRepository.save(item);
         return itemDtoMapper.mapToResponseDto(updatedItem);
+    }
+
+    @Override
+    @Modifying(clearAutomatically = true)
+    public CommentResponseDto addComment(Long userId, Long itemId, CommentRequestDto commentRequestDto) {
+        final User user = userDtoMapper.mapFromDto(userService.findById(userId));
+        final Item item = itemRepository.findById(itemId).orElseThrow(
+                () -> new NotFoundException("Вещь с id = " + itemId + " не найдена.")
+        );
+        Collection<BookingResponseDto> bookings = bookingService.findByUserId(userId, BookingStateDto.PAST);
+        bookings.stream()
+                .filter(booking -> booking.getItem().getId().equals(itemId))
+                .filter(booking -> booking.getEnd().isAfter(LocalDateTime.now().minusMinutes(1)))
+                .findAny().orElseThrow(
+                        () -> new ValidationException("Вещь с id = " + itemId + " не найдена среди прошлых бронирований пользователя " + userId + ".")
+                );
+        final Comment comment = commentRepository.save(commentDtoMapper.mapFromDto(item, user, commentRequestDto, LocalDateTime.now()));
+        return commentDtoMapper.mapToResponseDto(comment);
+    }
+
+    private void loadComments(ItemResponseDto item) {
+        Collection<CommentResponseDto> comments = commentRepository.findByItemId(item.getId()).stream()
+                        .map(commentDtoMapper::mapToResponseDto)
+                        .collect(Collectors.toCollection(ArrayList::new));
+        item.setComments(comments);
     }
 }

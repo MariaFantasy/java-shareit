@@ -4,12 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 
 @lombok.Data
 @lombok.AllArgsConstructor
-public class ItemRequestDto {
+@lombok.NoArgsConstructor
+public class CommentRequestDto {
     @NotBlank
-    private String name;
-
-    @NotBlank
-    private String description;
-
-    private Boolean available;
+    private String text;
 }

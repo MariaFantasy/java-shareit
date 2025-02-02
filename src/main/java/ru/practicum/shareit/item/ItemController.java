@@ -1,9 +1,12 @@
 package ru.practicum.shareit.item;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentRequestDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -43,7 +46,7 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemResponseDto create(@RequestHeader(USER_ID_HEADER_NAME) Long userId, @RequestBody ItemRequestDto itemRequestDto) {
+    public ItemResponseDto create(@RequestHeader(USER_ID_HEADER_NAME) Long userId, @Valid @RequestBody ItemRequestDto itemRequestDto) {
         log.info("Пришел POST запрос /items с userId = {} и телом: {}", userId, itemRequestDto);
         final ItemResponseDto createdItem = itemService.create(userId, itemRequestDto);
         log.info("Отпавлен ответ POST /items с телом: {}", createdItem);
@@ -56,5 +59,13 @@ public class ItemController {
         final ItemResponseDto updatedItem = itemService.update(itemId, userId, itemRequestDto);
         log.info("Отпавлен ответ PATCH /items/{} с телом: {}", itemId, updatedItem);
         return updatedItem;
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentResponseDto addComment(@PathVariable Long itemId, @RequestHeader(USER_ID_HEADER_NAME) Long userId, @Valid @RequestBody CommentRequestDto commentRequestDto) {
+        log.info("Пришел POST запрос /items/{}/comment с userId = {} и телом: {}", itemId, userId, commentRequestDto);
+        final CommentResponseDto createdComment = itemService.addComment(userId, itemId, commentRequestDto);
+        log.info("Отпавлен ответ POST /items/{}/comment с телом: {}", itemId, createdComment);
+        return createdComment;
     }
 }
