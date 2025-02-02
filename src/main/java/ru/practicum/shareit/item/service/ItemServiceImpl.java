@@ -1,9 +1,9 @@
 package ru.practicum.shareit.item.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.dto.BookingStateDto;
@@ -46,7 +46,6 @@ public class ItemServiceImpl implements ItemService {
     private BookingService bookingService;
 
     @Override
-    @Transactional
     public Collection<ItemResponseDto> findByText(String text) {
         if (text == null || text.isEmpty()) {
             return new HashSet<ItemResponseDto>();
@@ -58,7 +57,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
     public Collection<ItemResponseDto> findByUserId(Long userId) {
         final UserResponseDto user = userService.findById(userId);
         return itemRepository.findByOwnerId(user.getId()).stream()
@@ -91,7 +89,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
     public ItemResponseDto findById(Long itemId) {
         final Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException("Вещь с id = " + itemId + " не найдена.")
@@ -103,7 +100,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
     public ItemResponseDto create(Long userId, ItemRequestDto itemRequestDto) {
         final User user = userDtoMapper.mapFromDto(userService.findById(userId));
         if (itemRequestDto.getName() == null || itemRequestDto.getName().isEmpty() || itemRequestDto.getDescription() == null || itemRequestDto.getAvailable() == null) {
@@ -114,7 +110,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
     public ItemResponseDto update(Long itemId, Long userId, ItemRequestDto itemRequestDto) {
         final Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException("Вещь с id = " + itemId + " не найдена.")
@@ -137,8 +132,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
-    public ItemResponseDto addComment(Long userId, Long itemId, CommentRequestDto commentRequestDto) {
+    @Modifying(clearAutomatically = true)
+    public CommentResponseDto addComment(Long userId, Long itemId, CommentRequestDto commentRequestDto) {
         final User user = userDtoMapper.mapFromDto(userService.findById(userId));
         final Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException("Вещь с id = " + itemId + " не найдена.")
@@ -151,17 +146,9 @@ public class ItemServiceImpl implements ItemService {
                         () -> new ValidationException("Вещь с id = " + itemId + " не найдена среди прошлых бронирований пользователя " + userId + ".")
                 );
         final Comment comment = commentRepository.save(commentDtoMapper.mapFromDto(item, user, commentRequestDto, LocalDateTime.now()));
-
-        final Item createdItem = itemRepository.findById(itemId).orElseThrow(
-                () -> new NotFoundException("Вещь с id = " + itemId + " не найдена.")
-        );
-        ItemResponseDto itemResponseDto = itemDtoMapper.mapToResponseDto(createdItem);
-        loadComments(itemResponseDto);
-        return itemResponseDto;
-//        return commentDtoMapper.mapToResponseDto(comment);
+        return commentDtoMapper.mapToResponseDto(comment);
     }
 
-    @Transactional
     private void loadComments(ItemResponseDto item) {
         Collection<CommentResponseDto> comments = commentRepository.findByItemId(item.getId()).stream()
                         .map(commentDtoMapper::mapToResponseDto)

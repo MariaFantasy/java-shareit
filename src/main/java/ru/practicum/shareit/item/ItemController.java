@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentRequestDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -61,9 +62,9 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public ItemResponseDto addComment(@PathVariable Long itemId, @RequestHeader(USER_ID_HEADER_NAME) Long userId, @Valid @RequestBody CommentRequestDto commentRequestDto) {
+    public CommentResponseDto addComment(@PathVariable Long itemId, @RequestHeader(USER_ID_HEADER_NAME) Long userId, @Valid @RequestBody CommentRequestDto commentRequestDto) {
         log.info("Пришел POST запрос /items/{}/comment с userId = {} и телом: {}", itemId, userId, commentRequestDto);
-        final ItemResponseDto createdComment = itemService.addComment(userId, itemId, commentRequestDto);
+        final CommentResponseDto createdComment = itemService.addComment(userId, itemId, commentRequestDto);
         log.info("Отпавлен ответ POST /items/{}/comment с телом: {}", itemId, createdComment);
         return createdComment;
     }

@@ -9,12 +9,10 @@ import ru.practicum.shareit.item.model.Comment;
 import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    @Modifying(clearAutomatically = true)
-    @Transactional
     @Query(value = """
             SELECT c.*
             FROM comments AS c
-            WHERE c.id = ?1
+            WHERE c.item_id = ?1
         """,
         nativeQuery = true
     )
