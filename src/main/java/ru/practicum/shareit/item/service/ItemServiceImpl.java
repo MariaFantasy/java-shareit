@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -132,7 +133,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Modifying(clearAutomatically = true)
+    @Transactional
     public CommentResponseDto addComment(Long userId, Long itemId, CommentRequestDto commentRequestDto) {
         final User user = userDtoMapper.mapFromDto(userService.findById(userId));
         final Item item = itemRepository.findById(itemId).orElseThrow(
