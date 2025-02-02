@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.dto.BookingStateDto;
