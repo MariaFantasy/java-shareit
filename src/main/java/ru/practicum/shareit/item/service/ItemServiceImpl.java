@@ -46,6 +46,7 @@ public class ItemServiceImpl implements ItemService {
     private BookingService bookingService;
 
     @Override
+    @Transactional
     public Collection<ItemResponseDto> findByText(String text) {
         if (text == null || text.isEmpty()) {
             return new HashSet<ItemResponseDto>();
@@ -57,6 +58,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public Collection<ItemResponseDto> findByUserId(Long userId) {
         final UserResponseDto user = userService.findById(userId);
         return itemRepository.findByOwnerId(user.getId()).stream()
@@ -89,6 +91,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemResponseDto findById(Long itemId) {
         final Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException("Вещь с id = " + itemId + " не найдена.")
@@ -100,6 +103,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemResponseDto create(Long userId, ItemRequestDto itemRequestDto) {
         final User user = userDtoMapper.mapFromDto(userService.findById(userId));
         if (itemRequestDto.getName() == null || itemRequestDto.getName().isEmpty() || itemRequestDto.getDescription() == null || itemRequestDto.getAvailable() == null) {
@@ -110,6 +114,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemResponseDto update(Long itemId, Long userId, ItemRequestDto itemRequestDto) {
         final Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException("Вещь с id = " + itemId + " не найдена.")
