@@ -25,7 +25,7 @@ public class BookingController {
     public Collection<BookingResponseDto> findByUserId(@RequestHeader(USER_ID_HEADER_NAME) Long userId, @RequestParam(required = false, defaultValue = "ALL") BookingStateDto stateDto) {
         log.info("Пришел POST запрос /bookings?state={} с userId = {}", stateDto, userId);
         final Collection<BookingResponseDto> bookings = bookingService.findByUserId(userId, stateDto);
-        log.info("Отправлен ответ POST /bookings?state={} с телом: {}", stateDto, userId, bookings);
+        log.info("Отправлен ответ POST /bookings?state={} с userId = {} с телом: {}", stateDto, userId, bookings);
         return bookings;
     }
 
