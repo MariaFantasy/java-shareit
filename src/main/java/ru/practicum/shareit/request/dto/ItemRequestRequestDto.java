@@ -4,7 +4,8 @@ import jakarta.validation.constraints.NotNull;
 
 @lombok.Data
 @lombok.AllArgsConstructor
-public class ItemRequestDto {
+@lombok.NoArgsConstructor
+public class ItemRequestRequestDto {
     @NotNull
     private String description;
 }
