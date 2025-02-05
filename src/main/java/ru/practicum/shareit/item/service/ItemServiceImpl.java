@@ -10,16 +10,16 @@ import ru.practicum.shareit.booking.dto.BookingStateDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.dto.CommentRequestDto;
-import ru.practicum.shareit.item.dto.CommentResponseDto;
-import ru.practicum.shareit.item.dto.ItemResponseDto;
-import ru.practicum.shareit.item.dto.ItemRequestDto;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.mapper.CommentDtoMapper;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.request.mapper.ItemRequestDtoMapper;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
@@ -44,6 +44,9 @@ public class ItemServiceImpl implements ItemService {
     @Lazy
     @Autowired
     private BookingService bookingService;
+    @Lazy
+    @Autowired
+    private ItemRequestService itemRequestService;
 
     @Override
     public Collection<ItemResponseDto> findByText(String text) {
@@ -97,6 +100,14 @@ public class ItemServiceImpl implements ItemService {
         ItemResponseDto itemResponseDto = itemDtoMapper.mapToResponseDto(item);
         loadComments(itemResponseDto);
         return itemResponseDto;
+    }
+
+    @Override
+    public Collection<ItemToItemRequestDto> findByRequestId(Long requestId) {
+        final Collection<Item> items = itemRepository.findByItemRequestId(requestId);
+        return items.stream()
+                .map(itemDtoMapper::mapToItemRequestDto)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override

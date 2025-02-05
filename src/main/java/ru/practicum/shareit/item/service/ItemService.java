@@ -1,9 +1,6 @@
 package ru.practicum.shareit.item.service;
 
-import ru.practicum.shareit.item.dto.CommentRequestDto;
-import ru.practicum.shareit.item.dto.CommentResponseDto;
-import ru.practicum.shareit.item.dto.ItemResponseDto;
-import ru.practicum.shareit.item.dto.ItemRequestDto;
+import ru.practicum.shareit.item.dto.*;
 
 import java.util.Collection;
 
@@ -13,6 +10,8 @@ public interface ItemService {
     public Collection<ItemResponseDto> findByUserId(Long userId);
 
     public ItemResponseDto findById(Long itemId);
+
+    public Collection<ItemToItemRequestDto> findByRequestId(Long requestId);
 
     public ItemResponseDto create(Long userId, ItemRequestDto itemRequestDto);
 

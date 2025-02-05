@@ -3,7 +3,9 @@ package ru.practicum.shareit.item.mapper;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
+import ru.practicum.shareit.item.dto.ItemToItemRequestDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -15,6 +17,7 @@ public class ItemDtoMapper {
         final Item item = new Item(
                 null,
                 user,
+                itemRequestDto.getRequestId(),
                 itemRequestDto.getName(),
                 itemRequestDto.getDescription(),
                 itemRequestDto.getAvailable()
@@ -26,6 +29,7 @@ public class ItemDtoMapper {
         final Item item = new Item(
                 itemResponseDto.getId(),
                 user,
+                null,
                 itemResponseDto.getName(),
                 itemResponseDto.getDescription(),
                 itemResponseDto.getAvailable()
@@ -55,6 +59,15 @@ public class ItemDtoMapper {
                 null,
                 null,
                 null
+        );
+        return itemDto;
+    }
+
+    public ItemToItemRequestDto mapToItemRequestDto(Item item) {
+        final ItemToItemRequestDto itemDto = new ItemToItemRequestDto(
+                item.getId(),
+                item.getName(),
+                item.getOwner().getId()
         );
         return itemDto;
     }

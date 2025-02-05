@@ -2,10 +2,10 @@ package ru.practicum.shareit.item.dto;
 
 @lombok.Data
 @lombok.AllArgsConstructor
-public class ItemToIItemRequestDto {
+public class ItemToItemRequestDto {
     private Long id;
 
     private String name;
 
-    private user
+    private Long userId;
 }
