@@ -8,7 +8,6 @@ import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.dto.BookingStateDto;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.user.UserController;
 
 import java.util.Collection;
 

@@ -5,7 +5,6 @@ import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemToItemRequestDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
