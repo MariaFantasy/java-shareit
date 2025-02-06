@@ -45,7 +45,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleAccessException(final Exception e) {
+    public ErrorResponse handleException(final Exception e) {
         return new ErrorResponse(
                 "Нестандартная ошибка.",
                 e.getMessage()
