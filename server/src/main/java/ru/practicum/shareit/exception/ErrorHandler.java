@@ -42,13 +42,4 @@ public class ErrorHandler {
                 e.getMessage()
         );
     }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleException(final Exception e) {
-        return new ErrorResponse(
-                "Нестандартная ошибка.",
-                e.getMessage()
-        );
-    }
 }

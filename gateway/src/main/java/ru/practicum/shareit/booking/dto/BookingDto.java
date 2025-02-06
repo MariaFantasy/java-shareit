@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 @lombok.AllArgsConstructor
 @lombok.NoArgsConstructor
 public class BookingDto {
-    @FutureOrPresent
+    @NotNull
     private LocalDateTime start;
 
-    @Future
+    @NotNull
     private LocalDateTime end;
 
     @NotNull
